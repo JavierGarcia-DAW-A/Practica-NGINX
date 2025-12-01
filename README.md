@@ -2,6 +2,8 @@
 ## Trabajo realizado por Javier García Santiago y Pablo López Cabezas.
 ### Parte de Javier García, haciendo la parte de Docker.
 
+## NGINX-I
+
 ### 1. Instalación Docker:
 Primeramente tenemos que comprobar que tenemos Docker Desktop instalado y eso lo podemos hacer mediante **docker --version**:
 
@@ -77,6 +79,75 @@ Y para detenerlo ejecutamos un **docker-compose down**:
 
 ![down](capturas/compose-down.png)
 
+
+## NGINX-II
+
+Para esta parte de la práctica utilizaremos utilidades de OpenSSL, que ya están disponibles en el contenedor de **stakater/ssl-certs-generator**.
+
+![skater](capturas/docker-pull.png)
+
+Una vez hecho esto lo siguiente será crear los usuarios y sus contraseñas, los cuáles estarán en el fichero **conf/htpasswd**. Y en la htpasswd-createprimera línea ponemos el nombre del primer usuario.
+
+![htpasswd-create](capturas/crea-htpasswd.png)
+
+Ahora a dicho usuario le vamos a crwar una contraseña de forma no interactiva con el comando **docker run**, de la siguiente forma y con los siguientes parámetros:
+
+![crear-contr-htpasswd](capturas/comando-contr.png)
+
+Copiamos lo que nos ha generado(incluyendo el punto) y lo pegamos en la línea de nuestro usuario.
+
+![poner-contr](capturas/poner-contr.png)
+
+Una vez puesta la contraseña en nuestro usuario, vamos a hacer que para entrar a nuestro sitio web, nos pida una autentificación( poner usuario y contraseña ). Esto se hace en el archivo **nginx.conf** de la siguiente forma:
+
+![restr](capturas/restringida-nginx.png)
+
+Como vemos le tenemos que indicar que es un área restringida, y en que archivo se encuentran los usuarios junto con sus contraseñas que pueden acceder a ese sitio web. Y tendríamos que hacer un **docker run** indicándole el nombre del contenedor, el puerto que va a ocupar, el montaje del archivo de configuración, el de contraseñas, etc... Y una vez hecho eso comprobamos si es cierto que nos pide autentificación para acceder, si no, nos debería de salir un error.
+
+![run-docker](capturas/docker-run-auten.png)
+
+![compr](capturas/comprobar-contr.png)
+
+![dentro](capturas/confirmar-entrada-contr.png)
+
+Como podemos comprobar, nos deja acceder con nuestro usuario y contraseña correctos, pero si le damos a cancelar y no ponemos ningún usuario nos sale lo siguiente:
+
+![errorAutenti](capturas/confirmar-error.png)
+
+Dentro de los logs del contenedor de Docker Desktop, podemos comprobar si las respuestas han sido satisfactorias o no.
+
+![log-bien](capturas/log-usu-correcto.png)
+
+Como vemos en esta imagen, no nos da ningún error al iniciar con un usuario correcto, y nos cargan correctamente todos los archivos de el sitio web.
+
+![log-mal](capturas/error-usu-incorrecto.png)
+
+Pero como podemos comprobar en esta captura, nos da un error de que el usuario que se ha intentado introducir no fue encontrado en el archivo **htpasswd** y por lo tanto no tiene acceso.
+
+Lo que vamos a hacer a continuación, es restringir una sección de nuestro sitio web en concreto, en mi caso contact.html, para ello debemos editar el fichero **nginx.conf**, crear otra 
+**location /contact.html**, y poniéndole la restricción a esa location, y quitándosela al **location /**, y como podemos comprobar o para el apartado de contact.html sí nos pide las credenciales:
+
+![contact](capturas/contr-contact.png)
+
+Ahora lo que vamos a hacer es bloquear la IP de nuestra máquina anfitriona para que no pueda acceder al sitio web, esto se consigue modificando el archivo de configuración **nginx.conf**, haciendole un **deny** a la IP de nuestro servidor y un **allow** para todos los demás, pero también hay que poner un **satisfy all**, que hace que se realize todo:
+
+![bloq-anfi](capturas/nginx-conf-bloq-anfi.png)
+
+![prueba](capturas/prueba-bloc-anfi.png)
+
+Y como hemos visto en la anteiror captura, no accedemos al sitio web, pero donde mejor se ve el error es en el log, el cuál nos pone que el acceso para la IP de nuestro equipo:
+
+![log](capturas/log_bloc_anfi.png)
+
+Y para finalizar, vamos a poner, que la persona que entre al sitio web, debe de tener un usuario y una IP válida, por tanto volvemos a editar el archivo **nginx.conf**, pero esta vez, invertimos el **deny** y el **allow**, le ponemos el deny a todos los demás y el allow a nuestra IP:
+
+![nginx.conf-tarea2](capturas/tarea2_nginx-conf.png)
+
+Y ahora como vemos en la siguiente captura, entramos con nuestra IP y con un usuario correcto:
+
+![compr-tarea2](capturas/tarea2-compr.png)
+
+Y así podemos meter un sistema de autentificación en un sitio web.
 
 
 
