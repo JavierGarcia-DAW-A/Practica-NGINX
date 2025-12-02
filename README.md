@@ -150,6 +150,43 @@ Y ahora como vemos en la siguiente captura, entramos con nuestra IP y con un usu
 Y así podemos meter un sistema de autentificación en un sitio web.
 
 
+Una vez hecho un sistema de autentificación, vamos a añadirle un certificado autofirmado a nuestro servidor.
+
+Para ello primeramente tenemos que añadir a nuestro archivo **host** de nuestra máquina anfitriona, dos registros, los cuáles serán un nombre de servidor y un registro DNS.
+
+![host](capturas/host-III.png)
+
+Y una vez añadido esto, vamos a comprobar mediante un ping que funciona de forma correcta:
+
+![ping](capturas/prueba_ping.png)
+
+Ahora tenemos que pasar a crear el archivo de configuración **javier.test.conf** en nuestra carpeta **conf** para nuestro dominio y añadiremos la directiva **server_name** con los nombres de nuestro servidor.
+
+
+Ahora vamos a crear la clave SSL y el certificado mediante los siguientes comandos( el docker run tendremos que ajustarlo a nuestro nombre de server y demás parámetros ):
+
+![pull](capturas/pull-III.png)
+
+![run](capturas/run-III.png)
+
+Una vez creado el certificado y guardado en la carpeta certs de nuestro servidor, vamos a pasar a modificar nuestro archivo de configuración **javier.test.conf** añadiendole los puertos de escucha, la ubicación de los certificados, etc...
+
+Y cuando editemos el archivo ejecutamos un nuevo docker run, para poder lanzar nuestro servidor web:
+
+![test](capturas/run-III-mapeo.png)
+
+Ahora vamos a comprobar que poniendo en el navegador por ejemplo **javier.test** nos va a salir el contenido principal de nuestra página:
+
+![compr](capturas/compr-III.png)
+
+Pero como podemos observar arriba nos aparece como que el lugar no es seguro, pero no es problema nuestro o de nuestro certificado autofirmado, si no de los navegadores, porque como puedes comprobar en la siguiente captura, no se fían ya que no vienen de una entidad registrada
+
+![nav](capturas/conf-nav.png)
+
+Y de esta forma habríamos terminado todas las prácticas relativas a NGINX.
+
+
+
 
 
 
